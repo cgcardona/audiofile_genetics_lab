@@ -1,0 +1,51 @@
+body{
+  letter-spacing:1px;
+
+  h1,h2,h3,h4,h5,h6,p,div{
+    font-family:helvetica;
+    font-weight:200;
+  }
+
+  header{
+
+    h1{
+      font-size:1.75em;
+    }
+  } 
+
+  .measure{
+    margin-top:10px;
+
+    span:first-child{
+      color:#4183c4;
+      padding:5px;
+      border:solid 1px;
+      border-radius:5px;
+    }
+  }
+  
+  #gaDNAList li{
+    list-style-type: decimal;
+    margin: 20px 25px;
+    border: dotted 1px blue;
+    padding: 10px;
+  }
+  #gaDNAList li:first-child{
+    border-color: green;
+  }
+  #gaDNAList li:last-child{
+    border-color: red;
+  }
+  .root{
+    color:#4183c4;
+  }
+  .parent1DNA{
+    color:orange;
+  }
+  .parent2DNA{
+    color:#4183c4;
+  }
+  .mutatedDNA{
+    color:red;
+  }
+}
