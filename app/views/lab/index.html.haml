@@ -1,8 +1,8 @@
 #AFUIGeneticsLab
   #formCntr
     %form#gaForm
-      #lftClm
-        %div
+      .row
+        .span6
           %p.rng
             %span Generation Size:
             %span= range_field('generationSize',nil, {:value => '25', :id => 'generationSize', 'min' => '1', 'max' => '200', 'step' => '1'})
@@ -27,8 +27,7 @@
           %p
             %span#bitCnt 8
             bit DNA strands
-      #rghtClm
-        %div
+        .span6
           %p.rng
             %span Potential Step Count:
             %span= range_field('dnaStepCount',nil, {:value => '3', :id => 'dnaStepCount', 'min' => '1', 'max' => '9', 'step' => '1'})
