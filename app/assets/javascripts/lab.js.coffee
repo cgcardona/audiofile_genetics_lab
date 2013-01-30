@@ -135,7 +135,7 @@ class AFGeneticsLab
   evolveDNA : (generation) ->
     self = @
 
-    for itr in [0...@generationCount]
+    for itr in [0...(@generationCount - 1)]
       matedDNA = []
       @currentGenerationCount++
 
@@ -353,8 +353,8 @@ window.onload = ->
         $('<p>DNA: </p>').append(elmnt.dna),
         $('<p>Fitness: ' + elmnt.fitness + '</p>'),
         $('<p>Notes: ' + elmnt.notes + '</p>'),
-        $('<p>Parent1: </p>').append($('<a class="parent1DNA showParent" id="' + elmnt.parent1.name + '" href="#">' + elmnt.parent1.name + '</a>')),
-        $('<p>Parent2: </p>').append($('<a class="parent2DNA showParent" id="' + elmnt.parent2.name + '" href="#">' + elmnt.parent2.name + '</a>')),
+        $('<p>Parent1: </p>').append($('<a class="parent1DNA showParent" id="' + elmnt.parent1.name + '" href="#"></a>').append(elmnt.parent1)),
+        $('<p>Parent2: </p>').append($('<a class="parent2DNA showParent" id="' + elmnt.parent2.name + '" href="#"></a>').append(elmnt.parent2)),
         $('<p></p>').append($('<a class="play" href="#">Play</a>')),
       ]
 
