@@ -39,13 +39,13 @@ class AFGeneticsLab
 
   generateCreatures : ->
     generation = []
+
     for x in [0...@generationSize]
       dnaString = ''
       for i in [0...@dnaBitCount]
         dnaString += _.random(0, (@dnaStepCount - 1))
 
-      #tmpGradeArray = @gradeDNA(dnaString)
-      tmpGradeArray = ['507', 'abcd'] 
+      tmpGradeArray = @gradeDNA(dnaString)
 
       generation.push(new AFDNACreature({
         'name'       : (x + 1),
@@ -57,7 +57,74 @@ class AFGeneticsLab
         'parent2'    : 'first generation'
       }))
 
-      return generation
+    return generation
+
+  gradeDNA : (dnaStrand) ->
+    # right now gradeDNA is hardcoded around the notion of a 3 state dna bit.
+    # This needs to be far more generic to handle a far wider range of use cases.
+    soundState    = true
+    toneState     = 1
+    dnaBits       = dnaStrand.split('')
+    fitnessScore  = 0
+    currentNote   = @validNotes[@musicKey]
+    currentOctave = parseInt(@octave, 10)
+    noteString    = '| '
+    self          = @
+    indexOfNote = _.indexOf(self.validNotes, currentNote)
+
+    $(dnaBits).each((indx, elmnt) ->
+      if elmnt is 1
+        toneState += 1
+
+        if indexOfNote is 11 and indx is 0
+          currentOctave += 1
+
+        if indexOfNote is 11
+          indexOfNote = -1
+
+        currentNote = self.incrementNote(indexOfNote)
+      else if elmnt is 2
+        toneState -= 1
+        if indexOfNote is 0
+          indexOfNote = 12
+
+        currentNote = self.decrementNote(currentNote, indexOfNote)
+
+      indexOfNote = _.indexOf(self.validNotes, currentNote)
+
+      if toneState is 0
+        toneState = 12
+        currentOctave -= 1
+      else if toneState is 13
+        toneState = 1
+        currentOctave += 1
+
+      if currentOctave < 0
+        currentOctave = 0
+
+      if currentOctave > 8
+        currentOctave = 8
+
+      if elmnt is '0' and soundState is true
+        soundState = false
+      else if elmnt is '0' and soundState is false
+        soundState = true
+
+      if soundState is true
+        noteString += currentNote + currentOctave + ' | '
+      else
+        noteString += '- | '
+
+      if soundState is false
+        fitnessScore -=5
+
+      if _.contains(self.scaleSteps, toneState.toString()) and soundState is true
+        fitnessScore += 10
+      else
+        fitnessScore -= 10
+    )
+
+    return [fitnessScore, noteString];
 
 class AFDNACreature
   constructor : (settings) ->
