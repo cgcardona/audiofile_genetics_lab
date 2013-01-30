@@ -73,7 +73,7 @@ class AFGeneticsLab
     indexOfNote = _.indexOf(self.validNotes, currentNote)
 
     $(dnaBits).each((indx, elmnt) ->
-      if elmnt is 1
+      if elmnt is '1'
         toneState += 1
 
         if indexOfNote is 11 and indx is 0
@@ -83,12 +83,12 @@ class AFGeneticsLab
           indexOfNote = -1
 
         currentNote = self.incrementNote(indexOfNote)
-      else if elmnt is 2
+      else if elmnt is '2'
         toneState -= 1
         if indexOfNote is 0
           indexOfNote = 12
 
-        currentNote = self.decrementNote(currentNote, indexOfNote)
+        currentNote = self.decrementNote(indexOfNote)
 
       indexOfNote = _.indexOf(self.validNotes, currentNote)
 
@@ -126,6 +126,184 @@ class AFGeneticsLab
 
     return [fitnessScore, noteString];
 
+  incrementNote : (indexOfNote) ->
+    return @validNotes[indexOfNote + 1]
+
+  decrementNote : (indexOfNote) ->
+    return @validNotes[indexOfNote - 1]
+
+  evolveDNA : (generation) ->
+    self = @
+
+    for itr in [0...@generationCount]
+      matedDNA = []
+      @currentGenerationCount++
+
+      for itertr in [0...(@generationSize / 2)]
+        sortedGeneration = generation.sort((a,b) -> return a.fitness - b.fitness)
+        probabilityRange = _.range(1, @generationSize + 1)
+
+        total = 0
+        _.map(probabilityRange, (elmnt) ->
+          total += elmnt
+        )
+
+        mappedArray = _.map(probabilityRange, (num) ->
+          tmp = num / total
+          return parseFloat(tmp.toFixed(10))
+        )
+
+        cumulativeTotal = 0
+        cumulativeArray = _.map(mappedArray, (num) ->
+          return cumulativeTotal += num
+        )
+
+        closestValues1 = @getClosestValues(cumulativeArray, Math.random())
+        closestValues2 = @getClosestValues(cumulativeArray, Math.random())
+
+        matedDNA.push(@mateDNA(sortedGeneration[closestValues1[0]], sortedGeneration[closestValues2[0]], itertr))
+
+      generation = []
+      $(matedDNA).each((inxx, ell) ->
+        $(ell).each((innx, elmm) ->
+          generation.push(elmm)
+        )
+      )
+
+    return generation
+
+  getClosestValues : (a, x) ->
+    lo = 0
+    hi = a.length-1
+    while hi - lo > 1 
+      mid = Math.round((lo + hi)/2)
+      if (a[mid] <= x)
+        lo = mid
+      else
+        hi = mid
+    
+    if (a[lo] == x)
+      hi = lo
+    return [_.indexOf(a, a[hi]), a[hi]]
+
+  mateDNA : (parent1, parent2, itertr) ->
+    dnaBreakPoint  = _.random((@dnaBitCount - 2), 2)
+    
+    if parent1.dna[1]?
+      tmpParent1 = parent1.dna[0].innerText + parent1.dna[1].innerText
+      parent1SliceA = tmpParent1.slice(0, dnaBreakPoint)
+      parent1SliceB = tmpParent1.slice(dnaBreakPoint)
+    
+      tmpParent2 = parent2.dna[0].innerText + parent2.dna[1].innerText
+      parent2SliceA = tmpParent2.slice(0, dnaBreakPoint)
+      parent2SliceB = tmpParent2.slice(dnaBreakPoint)
+    else
+      parent1SliceA = parent1.dna[0].innerText.slice(0, dnaBreakPoint)
+      parent1SliceB = parent1.dna[0].innerText.slice(dnaBreakPoint)
+  
+      parent2SliceA = parent2.dna[0].innerText.slice(0, dnaBreakPoint)
+      parent2SliceB = parent2.dna[0].innerText.slice(dnaBreakPoint)
+
+    parents =
+      parent1SliceA : [
+        'parent1DNA',
+        parent1SliceA
+      ],
+      parent1SliceB : [
+        'parent1DNA',
+        parent1SliceB
+      ],
+      parent2SliceA : [
+        'parent2DNA',
+        parent2SliceA
+      ],
+      parent2SliceB : [
+        'parent2DNA',
+        parent2SliceB
+      ]
+
+    parentKeys = Object.keys(parents)
+
+    if @mutationPercentage > 0
+      mutateDNA = _.random(0, (100 / @mutationPercentage) - 1)
+
+    if mutateDNA is 0
+      parentToMutate = _.random(0, 3)
+      parents[parentKeys[parentToMutate]] = @mutateDNA(parents[parentKeys[parentToMutate]][1])
+
+    if !parents.parent1SliceA[2]?
+      tmpSpanEl1A = $('<span class="parent1DNA">').append(parents.parent1SliceA)
+    else
+      tmpSpanEl1A = $('<span class="parent1DNA">' + parents.parent1SliceA[1] + '</span>')
+
+    if !parents.parent1SliceB[2]?
+      tmpSpanEl1B = $('<span class="parent1DNA">').append(parents.parent1SliceB)
+    else
+      tmpSpanEl1B = $('<span class="parent1DNA">' + parents.parent1SliceB[1] + '</span>')
+
+    if !parents.parent2SliceA[2]?
+      tmpSpanEl2A = $('<span class="parent2DNA">').append(parents.parent2SliceA)
+    else
+      tmpSpanEl2A = $('<span class="parent2DNA">' + parents.parent2SliceA[1] + '</span>')
+
+    if !parents.parent2SliceB[2]?
+      tmpSpanEl2B = $('<span class="parent2DNA">').append(parents.parent2SliceB)
+    else
+      tmpSpanEl2B = $('<span class="parent2DNA">' + parents.parent2SliceB[1] + '</span>')
+
+    if parents['parent1SliceA'][2]?
+      parent1SliceA = $(parents['parent1SliceA']).text()
+
+    if parents['parent1SliceB'][2]?
+      parent1SliceB = $(parents['parent1SliceB']).text()
+
+    if parents['parent2SliceA'][2]?
+      parent2SliceA = $(parents['parent2SliceA']).text()
+
+    if parents['parent2SliceB'][2]?
+      parent2SliceB = $(parents['parent2SliceB']).text()
+
+    concatDNAStrands = [[parent1SliceA + parent2SliceB, $(tmpSpanEl1A).after(tmpSpanEl2B[0])], [parent2SliceA + parent1SliceB, $(tmpSpanEl2A).after(tmpSpanEl1B[0])]]
+
+    createNewCreaturesArray = []
+
+    self = @
+    name
+
+    $(concatDNAStrands).each((indx, elment) ->
+      if indx is 0
+        name = ((itertr + 1) * 2) - 1
+      else
+        name = ((itertr + 1) * 2)
+
+      tmpGrade = self.gradeDNA(elment[0])
+      createNewCreaturesArray.push(new AFDNACreature({
+        'name'       : name,
+        'dna'        : elment[1],
+        'fitness'    : tmpGrade[0].toString(),
+        'notes'      : tmpGrade[1],
+        'generation' : self.currentGenerationCount,
+        'parent1'    : parent1,
+        'parent2'    : parent2
+      }))
+    )
+
+    return createNewCreaturesArray
+
+  mutateDNA : (dnaStrand) ->
+    mutatedGene = _.random(0, (@dnaStepCount - 1))
+    if dnaStrand.length > 1
+      counter = _.random(1, (dnaStrand.length - 1))
+      parentSliceA = dnaStrand.slice(0, counter)
+      parentSliceB = dnaStrand.slice(counter)
+      childSliceA = parentSliceA.slice(0, parentSliceA.length - 1)
+      spanElmnt1 = $('<span></span>')
+      spanElmnt2 = $('<span class="mutatedDNA">' + mutatedGene + '</span>')
+      $(spanElmnt1).append(childSliceA)
+      return $(spanElmnt1).after(spanElmnt2).after(parentSliceB)
+    else
+      return $('<span class="mutatedDNA">' + mutatedGene + '</span>')
+
 class AFDNACreature
   constructor : (settings) ->
     @name       = settings.name
@@ -154,14 +332,12 @@ window.onload = ->
     # create a generation of creatures
     generationOfCreatures = afGeneticsLab.generateCreatures()
 
-    console.log(generationOfCreatures)
-    return false
     # Because it's the first generation wrap their dna property in a span with a class
     _.each(generationOfCreatures, (value, key) ->
       value.dna = $('<span class="root">' + value.dna + '</span>')
       value.parent1 = $('<span class="root">' + value.parent1 + '</span>')
       value.parent2 = $('<span class="root">' + value.parent2 + '</span>')
-    , this)
+    , @)
 
     # Evolve them and sort by fitness score
     evolvedGenerationOfCreatures = afGeneticsLab.evolveDNA(generationOfCreatures)
