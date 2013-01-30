@@ -50,6 +50,10 @@
           .row
             %span.span2 Octave: 
             %span.span1= select_tag "octave", options_for_select([["0"], ["1"], ["2"], ["3"], ["4", :selected => 'true'], ["5"], ["6"], ["7"]])
+          %hr
+          .row
+          %span.span2 
+            %button#gaSubmit Generate DNA 
 #creatureOutput
   .container
     %div
