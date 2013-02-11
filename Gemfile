@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'rails', '~> 3.2.11'
+gem 'rails', '~> 3.2.12'
 gem 'underscore-rails', '~> 1.4.3'
 gem "haml-rails", '~>0.3.5'
 gem 'bootstrap-sass'
